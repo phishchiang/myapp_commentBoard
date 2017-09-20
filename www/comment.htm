@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Comments</title>
+<script>
+function ajax(method, src, args, callback){
+	let req=new XMLHttpRequest();
+	if(method.toLowerCase()=="post"){
+		req.open(method, src);
+		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		req.onload=callback;
+		req.send(args);
+	}else{
+		req.open(method, src+"?"+args);
+		req.onload=callback;
+		req.send();
+	}
+}
+function post(){
+	var name=document.getElementById("name").value;
+	var content=document.getElementById("content").value;
+	// "/正則表示式regular expression/g" g 是global才可以對應到每一個
+	content=content.replace(/\r\n/g, "<br/>").replace(/\n/g, "<br/>");
+	// 這是為了要讓中文沒問題，讀取參數，因為這是網址的問題的關係
+	var args="name="+encodeURIComponent(name)+
+		"&content="+encodeURIComponent(content);
+	// 
+	ajax("post", "/post", args, function(){
+		// alert("OK");
+		get(); //PO 完立即更新資料!
+	});
+}
+var time=0;
+// 只抓 1970 01 01 之後的留言
+function get(){
+	ajax("get", "/get", "time="+time, function(){
+		var data=JSON.parse(this.responseText);
+		// data 是一個物件，不是字串了
+		var board=document.getElementById("board");
+		
+		// 方法一，先做清空，在列資料
+		// board.innerHTML=""; // 方法二，不要每次10秒更新，先拿掉
+		
+		var post;
+		for (var key in data){
+			post=data[key];
+			// console.log(data[key].time);
+			// let postTime = msToTime(data[key].time);
+			// console.log(post.name);
+			// console.log(post.content);
+			
+			board.innerHTML="<div>"+post.name.bold()+"<br/>"+
+				post.content+"<br/>"+post.time+"</div><hr/>"+board.innerHTML;
+			time=post.time+1; // 讓你只會get到最新的
+			
+		}
+	});
+}
+
+function msToTime(duration) {
+	var milliseconds = parseInt((duration%1000)/100),
+		seconds = parseInt((duration/1000)%60),
+		minutes = parseInt((duration/(1000*60))%60),
+		hours = parseInt((duration/(1000*60*60))%24),
+		days =  parseInt((duration/(1000*60*60)));
+
+	hours = (hours < 10) ? "0" + hours : hours;
+	minutes = (minutes < 10) ? "0" + minutes : minutes;
+	seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+	return "Time :"+days+ " days " +hours + ":" + minutes + ":" + seconds + "." + milliseconds;
+}
+	
+window.onload=function(){
+	get(); // 網頁一載入，立刻讀取一次
+	// 10 秒更新一次
+	window.setInterval(get, 5000);
+};
+
+</script>
+</head>
+<body>
+	<h3>Comments</h3>
+	<div>
+		Name: <input type="text" id="name" /><br/>
+		Content: <textarea id="content"></textarea>
+		<button onclick="post();">Post</button>
+	</div>
+	<hr/>
+	<div id="board"></div>
+</body>
+</html>
+
+
+
+
+<!-- 
+Q1 : &的意義為何?? 是否是傳送多個參數用?
+Q2 : 
+  -->
