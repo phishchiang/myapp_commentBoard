@@ -10,3 +10,6 @@ node index.js
 
 and the link will be
 http://127.0.0.1:3000/comment.htm
+
+and for the get link of data will be 
+http://127.0.0.1:3000/get?time=timeVariable
