@@ -22,7 +22,7 @@ let ref=database.ref("/messages");
 app.get("/get", function(req, res){
 	var time=parseInt(req.query.time); // get 參數 方法二
 	var ref=admin.database().ref("/comments");
-	ref.orderByChild("time").startAt(time).on("value", function(snapshot){
+	ref.orderByChild("time").startAt(time).once("value", function(snapshot){
 		var value=snapshot.val();
 		if(value==null){ // 資料是空的
 			res.send({});
